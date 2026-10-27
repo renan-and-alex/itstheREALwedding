@@ -112,6 +112,13 @@ h3{font:600 var(--fs-h3)/1.08 'Cormorant Garamond',Georgia,serif;margin:8px 0;co
 .map-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.6}
 .map-btn:focus-visible{outline:3px solid #859679;outline-offset:3px}
 .map-btns{display:flex;flex-wrap:wrap;justify-content:center;gap:0 10px}
+.music-btn{position:fixed;top:14px;right:14px;z-index:30;width:44px;height:44px;border-radius:50%;border:1px solid #b3ad92;background:rgba(250,247,238,.85);color:#5f6c52;display:none;align-items:center;justify-content:center;padding:0;cursor:pointer}
+.music-btn.show{display:flex}
+.music-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.music-btn .x{display:none}
+.music-btn[aria-pressed="false"] .x{display:block}
+.music-btn[aria-pressed="false"] .w{display:none}
+.music-btn:focus-visible{outline:3px solid #859679;outline-offset:3px}
 .heart{width:22px;height:20px;color:#b0a47f;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linejoin:round;margin:22px auto 0;display:block}
 /* The foreground is the user's image, not a recreated illustration. */
 .pocket-shade{position:absolute;z-index:6;bottom:0;left:50%;transform:translateX(-50%);height:13px;width:min(100vw,var(--stage-width));pointer-events:none;background:transparent}
@@ -477,6 +484,8 @@ h1 i{font:400 .95em/1 var(--script);color:#697556;padding:0 .08em}
 <symbol id="ic-moon" viewBox="0 0 24 24"><path d="M21 12.790A9 9 0 1 1 11.210 3 7 7 0 0 0 21 12.790z"/></symbol>
 </defs></svg>
 <div class="scroll-line" aria-hidden="true"><span id="progress"></span></div>
+<audio id="bgm" src="bg%20music.mp3" loop preload="none"></audio>
+<button class="music-btn" id="musicBtn" type="button" aria-pressed="true" aria-label="Background music"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.500v5h3.500L12 18.500v-13L7.500 9.500z"/><path class="w" d="M15.500 9a4 4 0 0 1 0 6M18 6.500a7.500 7.500 0 0 1 0 11"/><path class="x" d="M16 9.500l5 5M21 9.500l-5 5"/></svg></button>
 <div class="track" id="track">
   <div class="stage" id="stage">
     <div class="stage-layout">
@@ -812,9 +821,17 @@ h1 i{font:400 .95em/1 var(--script);color:#697556;padding:0 .08em}
 
  const clamp=(a,min,max)=>Math.max(min,Math.min(max,a));
  const easeOutCubic=t=>1-Math.pow(1-t,3);
+ const bgm=document.getElementById('bgm'),musicBtn=document.getElementById('musicBtn');
+ bgm.volume=.5;
+ musicBtn.addEventListener('click',()=>{
+  const on=musicBtn.getAttribute('aria-pressed')==='true';
+  if(on){bgm.pause()}else{bgm.play().catch(()=>{})}
+  musicBtn.setAttribute('aria-pressed',String(!on));
+ });
  function openInvitation(){
   if(isOpened || introAnimating) return;
   introAnimating=true;
+  bgm.play().then(()=>musicBtn.classList.add('show')).catch(()=>{musicBtn.setAttribute('aria-pressed','false');musicBtn.classList.add('show')});
   body.classList.add('opening');
    if(captionHint) captionHint.textContent='Opening the envelope…';
    clearTimeout(unlockTimer);
